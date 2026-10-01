@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Walkie Talkie</title>
+<style>
+:root{--bg:#d9ddd0;--panel:#f3f4ee;--ink:#1f2a22;--mute:#6b7569;--line:#c9cebf;--amber:#e8a317;--amber-d:#b97e00;--ok:#2f8f5b;--red:#c0392b}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:"Avenir Next","Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:disabled{cursor:not-allowed}
+input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amber-d);outline-offset:2px}
+[hidden]{display:none!important}
+#app{height:100%;display:grid;grid-template-columns:340px 1fr;max-width:1200px;margin:0 auto;background:var(--panel)}
+#side{display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:0}
+.me{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#me-name{font-weight:700;font-size:1.15rem}
+.hb{background:var(--amber);color:#000;font-size:.68rem;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.06em}
+.chip{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 9px;font-size:.82rem}
+.chip b{letter-spacing:.12em}
+.chip.dark{background:var(--ink);color:var(--amber);border-color:var(--ink)}
+.chip.danger{color:var(--red);border-color:#e3b5ae}
+.sp{flex:1}
+#net{font-size:.8rem;color:var(--mute);display:flex;align-items:center;gap:6px}
+.dot{width:9px;height:9px;border-radius:50%;background:#aaa;display:inline-block;flex:none}
+.dot.on{background:var(--ok)}
+.opt{font-size:.82rem;color:var(--mute);display:flex;gap:6px;align-items:center}
+.add{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.add input{min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.add button{background:var(--ink);color:#fff;border-radius:8px;padding:8px}
+.add #join{background:var(--amber);color:#000;font-weight:700}
+#contacts,.list{list-style:none;padding:0}
+#contacts{overflow:auto;flex:1}
+#contacts li{display:flex;gap:10px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+#contacts li:hover,#contacts li.sel{background:#e8ebdf}
+#contacts li.bl{opacity:.5}
+.av{width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--amber);display:grid;place-items:center;font-weight:700;flex:none;position:relative}
+.av .dot{position:absolute;right:-1px;bottom:-1px;border:2px solid var(--panel)}
+.av.tx{animation:ring 1s infinite}
+.ci{flex:1;min-width:0}
+.ci b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci small{color:var(--mute)}
+.tag{font-size:.65rem;font-weight:800;border:1px solid var(--amber-d);color:var(--amber-d);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+#chat{display:flex;flex-direction:column;min-height:0;background:var(--bg);position:relative}
+#empty{margin:auto;text-align:center;color:var(--mute);padding:24px;max-width:360px;line-height:1.5}
+#prof,#hostv{display:none;flex-direction:column;flex:1;min-height:0;overflow:auto}
+#chat[data-v=prof] #prof,#chat[data-v=host] #hostv{display:flex}
+#chat[data-v] #empty{display:none}
+.foot{display:none}
+#chat[data-v] .foot{display:flex}
+.top{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.back{display:none;font-size:1.4rem;padding:0 6px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px 8px;text-align:center}
+.hero .av{width:92px;height:92px;font-size:2.2rem}
+.hero .av .dot{width:20px;height:20px;right:2px;bottom:2px}
+.hero h2{font-size:1.5rem}
+.pill{border-radius:99px;padding:4px 14px;font-size:.88rem;font-weight:700;background:#e2e4da;color:var(--mute)}
+.pill.on{background:#d3ecdc;color:var(--ok)}
+.pill.bl{background:#f3d5d0;color:var(--red)}
+.seg{display:flex;border:1px solid var(--ink);border-radius:10px;overflow:hidden}
+.seg button{padding:7px 18px;font-size:.88rem}
+.seg button.on{background:var(--ink);color:var(--amber)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.sec{padding:14px 16px 4px;display:flex;align-items:center;gap:8px;font-weight:700}
+.sec small{color:var(--mute);font-weight:400}
+.list li{display:flex;align-items:center;gap:10px;padding:9px 16px;border-top:1px solid var(--line);font-size:.92rem}
+.list li.none{color:var(--mute);justify-content:center;text-align:center;line-height:1.4;padding:14px 20px}
+.list .ci small{display:block}
+.rp{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--amber);flex:none}
+#banner{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--ink);color:#fff;cursor:pointer;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+#banner.on{display:flex}
+#bn{font-weight:700;font-size:1.05rem;color:var(--amber)}
+#bs{font-size:.82rem;color:#c9cebf}
+.eq{display:flex;gap:3px;align-items:center;height:22px}
+.eq i{width:4px;height:100%;background:var(--amber);border-radius:2px;animation:eq .6s infinite ease-in-out alternate}
+.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}.eq i:nth-child(4){animation-delay:.45s}
+@keyframes eq{from{transform:scaleY(.2)}to{transform:scaleY(1)}}
+.foot{padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));background-color:var(--panel);background-image:radial-gradient(#c9cebf 1.2px,transparent 1.4px);background-size:10px 10px;border-top:1px solid var(--line);flex-direction:column;align-items:center;gap:8px}
+#status-line{font-size:.88rem;color:var(--mute);min-height:1.2em;text-align:center}
+#ptt{width:92px;height:92px;border-radius:50%;background:var(--amber);color:#000;font-weight:700;box-shadow:0 6px 0 var(--amber-d);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .08s,box-shadow .08s}
+#ptt:disabled{background:#b9bdb0;box-shadow:0 6px 0 #8f9488;color:#5d6459}
+#ptt.live{transform:translateY(5px);box-shadow:0 1px 0 var(--amber-d);background:var(--red);color:#fff;animation:ring 1s infinite}
+#ptt.cancel{background:#555;animation:none}
+@keyframes ring{0%{outline:0 solid rgba(192,57,43,.5)}100%{outline:22px solid rgba(192,57,43,0)}}
+.fr{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+#vol{width:110px;accent-color:var(--ink)}
+#toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:.9rem;display:none;max-width:90%;text-align:center;z-index:20}
+#setup{position:fixed;inset:0;background:rgba(31,42,34,.7);display:none;place-items:center;z-index:30;padding:20px}
+#setup.show{display:grid}
+#setup form{background:var(--panel);border-radius:16px;padding:24px;width:min(380px,100%);display:flex;flex-direction:column;gap:12px}
+#setup p{color:var(--mute);font-size:.92rem;line-height:1.45}
+#setup input{padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+#setup button{background:var(--ink);color:#fff;border-radius:10px;padding:12px}
+@media(max-width:760px){
+ #app{grid-template-columns:1fr}
+ #chat{display:none}
+ #app.in-chat #side{display:none}
+ #app.in-chat #chat{display:flex}
+ .back{display:block}
+}
+@media(prefers-reduced-motion:reduce){#ptt.live,.av.tx,.eq i{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+ <aside id="side">
+  <div class="me">
+   <div class="row2"><span id="me-name"></span><span class="hb" id="hbadge" hidden>HOST</span><span class="sp"></span><button class="chip" id="rename">Edit name</button></div>
+   <div class="row2">
+    <button class="chip" id="copy-id" title="Copy your ID">ID: <b id="my-id"></b></button>
+    <button class="chip" id="change-id" title="Set custom ID (e.g. ID-YOBRO)">Change ID</button>
+    <button class="chip" id="copy-link">Invite link</button>
+   </div>
+   <div class="row2" id="host-row">
+    <label class="opt" id="hostsw-wrap"><input type="checkbox" id="hostsw"> Host mode <small id="host-lock" style="color:var(--mute)">(ID-YOBRO only)</small></label>
+    <span class="sp"></span>
+    <button class="chip dark" id="console" hidden>Host console</button>
+   </div>
+   <div id="net"><span class="dot" id="net-dot"></span><span id="net-txt">Connecting…</span></div>
+  </div>
+  <form class="add" id="add-form">
+   <input id="add-id" placeholder="Friend's ID (e.g. ID-YOBRO)" maxlength="16" autocomplete="off" aria-label="Friend's ID">
+   <input id="add-name" placeholder="Name" maxlength="24" autocomplete="off" aria-label="Friend's name">
+   <button>Add friend</button><button type="button" id="join" title="Join this person's channel (they must be a host)">Join channel</button>
+  </form>
+  <ul id="contacts"></ul>
+ </aside>
+
+ <main id="chat">
+  <div id="banner"><div class="eq"><i></i><i></i><i></i><i></i></div><div><div id="bn"></div><div id="bs"></div></div></div>
+  <div id="empty"><h2>Pick a friend</h2><p>Open a friend's profile to see if they're online. If they are, hold TALK and they hear you right away, with your name on it. Try Echo first to test your mic.</p></div>
+
+  <section id="prof">
+   <div class="top"><button class="back" id="back" aria-label="Back">‹</button><span class="sp"></span></div>
+   <div class="hero">
+    <div class="av" id="pav"><span id="pl"></span><i class="dot" id="pdot"></i></div>
+    <h2 id="pname"></h2>
+    <div class="pill" id="pst"></div>
+    <small id="pid" style="color:var(--mute)"></small>
+    <div class="seg" id="seg" hidden><button id="sg-p">Private</button><button id="sg-c">Channel</button></div>
+    <div class="acts">
+     <button class="chip" id="p-ren">Rename</button>
+     <button class="chip danger" id="p-blk">Block</button>
+     <button class="chip" id="p-rm">Remove</button>
+    </div>
+   </div>
+   <div class="sec">Heard from them <small>(replay)</small></div>
+   <ul class="list" id="plog"></ul>
+  </section>
+
+  <section id="hostv">
+   <div class="top"><button class="back" id="back2" aria-label="Back">‹</button><b>Host console</b><span class="hb">HOST</span><span class="sp"></span>
+    <label class="opt"><input type="checkbox" id="mon"> Listen to everything</label></div>
+   <div class="sec">Connected with your ID <small id="rc"></small></div>
+   <ul class="list" id="roster"></ul>
+   <div class="sec">Heard on the channel</div>
+   <ul class="list" id="hlog"></ul>
+   <div class="sec">Blocked</div>
+   <ul class="list" id="blist"></ul>
+  </section>
+
+  <div class="foot">
+   <div id="status-line"></div>
+   <button id="ptt" aria-label="Hold to talk">TALK</button>
+   <div class="fr">
+    <label class="opt">Volume <input type="range" id="vol" min="0" max="1" step=".05" value="1"></label>
+    <label class="opt"><input type="checkbox" id="auto" checked> Auto-play incoming</label>
+   </div>
+  </div>
+ </main>
+</div>
+<div id="toast" role="status"></div>
+<div id="setup"><form id="setup-form">
+ <h1>Walkie Talkie</h1>
+ <p>Pick a name. Friends see it on every transmission. Your ID and contacts stay on this device.</p>
+ <input id="setup-name" placeholder="Your name" maxlength="24" required autocomplete="off">
+ <input id="setup-id" placeholder="Custom ID (optional, e.g. ID-YOBRO)" maxlength="16" autocomplete="off">
+ <button>Start</button>
+</form></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const ECHO='ECHO00',HOST_ID='ID-YOBRO',ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const genId=()=>{let s='';crypto.getRandomValues(new Uint8Array(6)).forEach(b=>s+=ALPHA[b%32]);return s};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+
+function isHostId(s){
+  if(!s)return false;
+  const clean=s.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return clean==='IDYOBRO'||clean==='YOBRO'||s.toUpperCase()==='ID-YOBRO';
+}
+
+function normId(s){
+  if(!s)return '';
+  let str=s.toUpperCase().trim();
+  if(isHostId(str))return HOST_ID;
+  return str.replace(/[^A-Z0-9\-]/g,'');
+}
+
+const fmtTime=t=>new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const btn=(t,f,c)=>{const b=el('button','chip '+(c||''),t);b.onclick=e=>{e.stopPropagation();f()};return b};
+
+let me=ls.get('wt_me',null);
+let contacts=ls.get('wt_contacts',null)||[{id:ECHO,name:'Echo (test)'}];
+let blocked=new Set(ls.get('wt_blocked',[]));
+const save=()=>{ls.set('wt_contacts',contacts);ls.set('wt_blocked',[...blocked]);if(me)ls.set('wt_me',me)};
+const getC=id=>contacts.find(c=>c.id===id);
+let view=null,curId=null,chan=false,peer=null,conns={},tried={},members={},pend={};
+let pq=[],playing=null,aud=null,logs=[],pressing=false,ft;
+
+function userHasHostAccess(){
+  if(!me)return false;
+  return isHostId(me.id)||!!me.unlockedHost||contacts.some(c=>isHostId(c.id));
+}
+
+/* ---------- toast + sounds ---------- */
+let toastT;
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>e.style.display='none',3200)}
+let actx;
+function beep(f,d,delay=0,type='sine',v=.07){
+  actx=actx||new(window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended')actx.resume();
+  const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;
+  o.connect(g);g.connect(actx.destination);const t=actx.currentTime+delay;o.start(t);o.stop(t+d);
+}
+const roger=()=>{beep(1200,.06);beep(1600,.06,.09)};
+const squelch=()=>beep(700,.09,0,'square',.035);
+
+/* ---------- networking ---------- */
+const isOnline=id=>id===ECHO||!!(conns[id]&&conns[id].open&&Date.now()-conns[id].pong<15000);
+const nameOf=id=>(getC(id)&&getC(id).name)||(members[id]&&members[id].name)||(conns[id]&&conns[id].nm)||id;
+function setNet(ok,t){$('#net-dot').classList.toggle('on',ok);$('#net-txt').textContent=t}
+function startPeer(){
+  if(typeof Peer==='undefined'){setNet(false,'Could not load PeerJS (check internet)');return}
+  peer=new Peer('wtalk-'+me.id);
+  peer.on('open',()=>setNet(true,me.host?'On air · hosting':'On air · friends can reach you'));
+  peer.on('connection',c=>{
+    const rid=c.peer.replace('wtalk-','');
+    if(blocked.has(rid)){c.on('open',()=>c.close());return}
+    if(isHostId(rid)){
+      me.unlockedHost=true;
+      me.host=true;
+      save();
+      applyHost();
+      toast('Connected with host ID-YOBRO! Host mode unlocked.');
+    }
+    setupConn(c);
+  });
+  peer.on('disconnected',()=>{setNet(false,'Reconnecting…');try{peer.reconnect()}catch(e){}});
+  peer.on('error',e=>{
+    if(e.type==='unavailable-id')setNet(false,'ID '+me.id+' is already open in another tab or device');
+    else if(e.type!=='peer-unavailable')setNet(false,'Network problem: '+e.type);
+  });
+}
+function connect(id){
+  if(id===ECHO||!peer||!peer.open||blocked.has(id)||(conns[id]&&conns[id].open))return;
+  if(Date.now()-(tried[id]||0)<5000)return;
+  tried[id]=Date.now();
+  setupConn(peer.connect('wtalk-'+id,{reliable:true}));
+}
+function setupConn(c){
+  const rid=c.peer.replace('wtalk-','');
+  c.on('open',()=>{
+    c.pong=Date.now();conns[rid]=c;
+    const k=getC(rid);
+    c.send({t:'hello',name:me.name,ch:!!(k&&k.host)});
+    refresh();
+  });
+  c.on('data',d=>onData(rid,d));
+  const gone=()=>{if(conns[rid]===c){delete conns[rid];delete members[rid]}refresh()};
+  c.on('close',gone);c.on('error',gone);
+}
+function sendRaw(id,o){const c=conns[id];if(c&&c.open){try{c.send(o);return true}catch(e){}}return false}
+function ensureContact(id,name){
+  let c=getC(id);
+  if(!c){c={id,name:name||id};contacts.push(c);save()}
+  else if(name&&c.name===c.id){c.name=name;save()}
+  return c;
+}
+function onData(rid,d){
+  if(!d||!d.t||blocked.has(rid))return;
+  const c=conns[rid];
+  if(d.t==='hello'){
+    if(c)c.nm=d.name;
+    const k=getC(rid);if(k&&k.name===k.id&&d.name){k.name=d.name;save()}
+    if(d.ch){
+      if(me.host){members[rid]={name:d.name,mute:false};toast(d.name+' joined your channel')}
+      else sendRaw(rid,{t:'deny'});
+    }
+    refresh();
+  }else if(d.t==='deny')toast(nameOf(rid)+' is not hosting a channel');
+  else if(d.t==='ping')sendRaw(rid,{t:'pong',ts:d.ts});
+  else if(d.t==='pong'&&c){c.pong=Date.now();c.rtt=Date.now()-d.ts}
+  else if(d.t==='ack'&&pend[d.mid]){
+    $('#status-line').textContent='Heard by '+nameOf(rid)+' ✓✓';delete pend[d.mid];
+    clearTimeout(ft);ft=setTimeout(refreshFoot,3500);
+  }else if(d.t==='voice')onVoice(rid,d);
+}
+function onVoice(rid,d){
+  const blob=new Blob([d.buf],{type:d.mime});
+  if(d.ch){
+    if(me.host){
+      const m=members[rid];if(!m||m.mute)return;
+      if(me.mon)hear(m.name,blob,d.dur,true,rid,d.mid);
+      Object.keys(members).forEach(id=>{if(id!==rid&&!members[id].mute&&!blocked.has(id))sendRaw(id,{t:'voice',mid:d.mid,dur:d.dur,mime:d.mime,buf:d.buf,name:m.name,ch:true})});
+      sendRaw(rid,{t:'ack',mid:d.mid});
+    }else hear(d.name,blob,d.dur,true,rid,d.mid);
+  }else{
+    const k=ensureContact(rid,d.name);
+    hear(k.name,blob,d.dur,false,rid,d.mid);
+  }
+}
+async function transmit(blob,dur){
+  const mid=uid(),buf=await blob.arrayBuffer();
+  const o={t:'voice',mid,dur,mime:blob.type,buf,name:me.name};
+  if(view==='host'){let n=0;Object.keys(members).forEach(id=>{if(!members[id].mute&&sendRaw(id,{...o,ch:true}))n++});return n}
+  if(curId===ECHO){setTimeout(()=>hear('Echo',blob,dur,false,ECHO,mid),700);return 1}
+  if(!sendRaw(curId,chan?{...o,ch:true}:o))return 0;
+  pend[mid]=1;return 1;
+}
+setInterval(()=>{
+  if(!peer||!peer.open)return;
+  Object.keys(conns).forEach(id=>sendRaw(id,{t:'ping',ts:Date.now()}));
+  contacts.slice(0,40).forEach(c=>connect(c.id));
+  refresh();
+},4000);
+
+/* ---------- moderation ---------- */
+function block(id){
+  blocked.add(id);delete members[id];if(conns[id])conns[id].close();
+  pq=pq.filter(i=>i.id!==id);save();toast(nameOf(id)+' blocked');refresh();
+}
+function unblock(id){blocked.delete(id);save();toast('Unblocked');refresh();connect(id)}
+
+/* ---------- playback (incoming transmissions) ---------- */
+function hear(name,blob,dur,ch,id,mid){pq.push({name,blob,dur,ch,id,mid,ts:Date.now()});pump()}
+function pump(){
+  if(playing||pressing||!pq.length)return;
+  const it=pq.shift(),b=$('#banner');playing=it;
+  $('#bn').textContent=it.name;$('#bs').textContent=it.ch?'on the channel':'transmitting to you';
+  b.className='on';b.onclick=null;
+  const a=aud=new Audio(URL.createObjectURL(it.blob));a.volume=+$('#vol').value;
+  const end=()=>{
+    if(aud!==a)return;
+    a.pause();URL.revokeObjectURL(a.src);aud=null;playing=null;b.className='';
+    if(!it.re){logs.unshift(it);logs=logs.slice(0,40);if(!it.ch)sendRaw(it.id,{t:'ack',mid:it.mid})}
+    squelch();refresh();pump();
+  };
+  it.end=end;a.onended=end;a.onerror=end;
+  const manual=()=>{$('#bs').textContent='tap to listen';b.onclick=()=>{b.onclick=null;$('#bs').textContent='playing';a.play().catch(end)}};
+  squelch();
+  if($('#auto').checked||it.re)a.play().catch(manual);else manual();
+  refresh();
+}
+function replay(it){pq.unshift({...it,re:1});pump()}
+function logList(ul,filter,empty){
+  ul.innerHTML='';const items=logs.filter(filter).slice(0,12);
+  if(!items.length)ul.append(el('li','none',empty));
+  items.forEach(it=>{
+    const li=el('li'),r=el('button','rp','▶');r.setAttribute('aria-label','Replay');r.onclick=()=>replay(it);
+    const t=el('div','ci');t.append(el('b','',it.name),el('small','',fmtTime(it.ts)+' · '+Math.round(it.dur)+'s'+(it.ch?' · channel':'')));
+    li.append(r,t);ul.append(li);
+  });
+}
+
+/* ---------- views ---------- */
+function target(){
+  if(view==='host'){const n=Object.keys(members).filter(i=>!members[i].mute).length;return n?{ok:1,msg:'Broadcasting to '+n+' on your channel'}:{ok:0,msg:'Nobody has joined your channel yet'}}
+  if(!curId)return{ok:0,msg:''};
+  const k=getC(curId);
+  if(blocked.has(curId))return{ok:0,msg:'Blocked. Unblock to talk.'};
+  if(!isOnline(curId))return{ok:0,msg:k.name+' is offline. You can talk when they are online.'};
+  return{ok:1,msg:chan?'Channel: everyone on '+k.name+'\'s channel hears you':'Hold to talk to '+k.name+' · or hold Space'};
+}
+function refreshFoot(){
+  if(pressing)return;
+  const t=target();$('#ptt').disabled=!t.ok;$('#status-line').textContent=t.msg;
+}
+function renderContacts(){
+  const ul=$('#contacts');ul.innerHTML='';
+  const w=c=>(blocked.has(c.id)?2:isOnline(c.id)?0:1);
+  [...contacts].sort((a,b)=>w(a)-w(b)||a.name.localeCompare(b.name)).forEach(c=>{
+    const li=el('li',(c.id===curId&&view==='prof'?'sel ':'')+(blocked.has(c.id)?'bl':''));
+    const av=el('div','av'+(playing&&playing.id===c.id?' tx':''));
+    av.append(el('span','',c.name.slice(0,1).toUpperCase()),el('i','dot'+(isOnline(c.id)?' on':'')));
+    const ci=el('div','ci'),b=el('b','',c.name);if(c.host)b.append(el('span','tag','CHANNEL'));
+    const rtt=conns[c.id]&&conns[c.id].rtt;
+    ci.append(b,el('small','',blocked.has(c.id)?'blocked':c.id+(isOnline(c.id)?' · online'+(rtt!=null?' · '+rtt+' ms':''):' · offline')));
+    li.append(av,ci);li.onclick=()=>openProfile(c.id);ul.append(li);
+  });
+}
+function renderProfile(){
+  const c=getC(curId);if(!c){return}
+  const on=isOnline(c.id),bl=blocked.has(c.id),rtt=conns[c.id]&&conns[c.id].rtt;
+  $('#pl').textContent=c.name.slice(0,1).toUpperCase();$('#pdot').classList.toggle('on',on&&!bl);
+  $('#pname').textContent=c.name;$('#pid').textContent='ID '+c.id;
+  const p=$('#pst');p.className='pill'+(bl?' bl':on?' on':'');
+  p.textContent=bl?'Blocked':on?(c.id===ECHO?'Online (local test)':'Online'+(rtt!=null?' · '+rtt+' ms':'')):'Offline';
+  $('#seg').hidden=!c.host;$('#sg-p').classList.toggle('on',!chan);$('#sg-c').classList.toggle('on',chan);
+  $('#p-blk').textContent=bl?'Unblock':'Block';$('#p-blk').hidden=c.id===ECHO;
+  logList($('#plog'),i=>i.id===c.id&&!i.ch,'Nothing heard from them yet.');
+}
+function renderHost(){
+  const L=$('#roster');L.innerHTML='';
+  const ids=Object.keys(members).filter(i=>conns[i]&&conns[i].open&&!blocked.has(i));
+  $('#rc').textContent=ids.length+' connected with your ID';
+  ids.forEach(id=>{
+    const m=members[id],li=el('li'),ci=el('div','ci');
+    ci.append(el('b','',nameOf(id)),el('small','',id+' · '+'channel member · '+(conns[id].rtt!=null?conns[id].rtt+' ms':'…')+(m&&m.mute?' · muted':'')));
+    li.append(el('i','dot on'),ci);
+    li.append(btn(m.mute?'Unmute':'Mute',()=>{m.mute=!m.mute;refresh()}),btn('Kick',()=>conns[id]&&conns[id].close()));
+    li.append(btn('Block',()=>block(id),'danger'));L.append(li);
+  });
+  if(!ids.length)L.append(el('li','none','Nobody has connected with your ID yet. Share your invite link; people who open it or tap "Join channel" appear here.'));
+  logList($('#hlog'),i=>i.ch,'Channel traffic you listen to shows up here.');
+  const B=$('#blist');B.innerHTML='';
+  [...blocked].forEach(id=>{const li=el('li'),ci=el('div','ci');ci.append(el('b','',nameOf(id)),el('small','',id));li.append(ci,btn('Unblock',()=>unblock(id)));B.append(li)});
+  if(!blocked.size)B.append(el('li','none','No one blocked.'));
+}
+function refresh(){
+  renderContacts();
+  if(view==='prof')renderProfile();
+  if(view==='host')renderHost();
+  refreshFoot();
+}
+function show(v){
+  view=v;$('#chat').dataset.v=v||'';$('#app').classList.toggle('in-chat',!!v);
+}
+function openProfile(id){curId=id;chan=false;show('prof');connect(id);refresh()}
+function leave(){if(pressing)stopRec(true);show(null);curId=null;view=null;delete $('#chat').dataset.v;renderContacts()}
+$('#back').onclick=leave;$('#back2').onclick=leave;
+$('#sg-p').onclick=()=>{chan=false;refresh()};$('#sg-c').onclick=()=>{chan=true;refresh()};
+$('#console').onclick=()=>{
+  if(!userHasHostAccess()){toast('Host console is restricted to ID-YOBRO connections.');return}
+  curId=null;show('host');refresh();
+};
+
+$('#hostsw').onchange=e=>{
+  if(!userHasHostAccess()){
+    e.target.checked=false;
+    const ans=prompt('Host mode is only for people who connect with ID-YOBRO.\nEnter Host ID to unlock:');
+    if(ans&&isHostId(ans)){
+      me.unlockedHost=true;me.host=true;me.mon=true;
+      save();applyHost();toast('Host mode unlocked with ID-YOBRO!');refresh();
+    }else{
+      toast('Host mode locked. Connect with ID-YOBRO to access.');
+    }
+    return;
+  }
+  me.host=e.target.checked;
+  if(!me.host){Object.keys(members).forEach(id=>sendRaw(id,{t:'deny'}));members={};if(view==='host')leave()}
+  save();applyHost();refresh();
+};
+
+$('#mon').onchange=e=>{me.mon=e.target.checked;save()};
+
+function applyHost(){
+  const hasAccess=userHasHostAccess();
+  if(!hasAccess){me.host=false}
+  const isHost=!!(me.host&&hasAccess);
+  $('#hbadge').hidden=!isHost;
+  $('#console').hidden=!hasAccess;
+  $('#hostsw').checked=isHost;
+  $('#host-lock').hidden=hasAccess;
+  $('#mon').checked=me.mon!==false;
+  if(peer&&peer.open)setNet(true,isHost?'On air · hosting':'On air · friends can reach you');
+}
+
+$('#p-blk').onclick=()=>blocked.has(curId)?unblock(curId):block(curId);
+$('#p-rm').onclick=()=>{
+  if(curId===ECHO)return toast('Echo stays for testing');
+  if(!confirm('Remove this contact?'))return;
+  contacts=contacts.filter(c=>c.id!==curId);save();leave();
+};
+$('#p-ren').onclick=()=>{const c=getC(curId),n=prompt('Name for this contact',c.name);if(n&&n.trim()){c.name=n.trim().slice(0,24);save();refresh()}};
+
+function addFriend(join){
+  const raw=$('#add-id').value.trim();
+  const id=normId(raw),nm=$('#add-name').value.trim();
+  if(id.length<4)return toast('Enter your friend\'s ID');
+  if(id===me.id)return toast('That is your own ID');
+
+  if(isHostId(id)||isHostId(raw)){
+    me.unlockedHost=true;
+    me.host=true;
+    me.mon=true;
+    toast('Connected with ID-YOBRO! Host mode unlocked.');
+  }
+
+  const c=ensureContact(id,nm||(isHostId(id)?'Host (ID-YOBRO)':id));
+  if(nm)c.name=nm;
+  if(join||isHostId(id))c.host=true;
+  save();applyHost();
+  $('#add-id').value='';$('#add-name').value='';
+  blocked.delete(id);connect(id);openProfile(id);
+  if(join||isHostId(id)){chan=true;refresh()}
+}
+
+$('#add-form').onsubmit=e=>{e.preventDefault();addFriend(false)};
+$('#join').onclick=()=>addFriend(true);
+$('#copy-id').onclick=()=>copy(me.id,'ID copied');
+$('#copy-link').onclick=()=>copy(location.origin+location.pathname+'?add='+me.id+'&n='+encodeURIComponent(me.name)+(me.host?'&h=1':''),'Invite link copied');
+
+$('#change-id').onclick=()=>{
+  const n=prompt('Set your ID :',me.id);
+  if(!n)return;
+  const nid=normId(n);
+  if(nid.length<4)return toast('ID must be at least 4 characters');
+  if(nid===me.id)return;
+  me.id=nid;
+  if(isHostId(nid)){
+    me.unlockedHost=true;me.host=true;me.mon=true;
+    toast('Your ID is now '+HOST_ID+' · Host mode unlocked!');
+  }
+  save();
+  $('#my-id').textContent=me.id;
+  applyHost();
+  if(peer){try{peer.destroy()}catch(e){}}
+  startPeer();refresh();
+};
+
+$('#rename').onclick=()=>{const n=prompt('Your name',me.name);if(n&&n.trim()){me.name=n.trim().slice(0,24);save();$('#me-name').textContent=me.name}};
+function copy(t,m){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast(m),()=>prompt('Copy this:',t))}
+
+/* ---------- push to talk ---------- */
+let stream,rec,chunks=[],t0=0,timerI,slide=false,startX=0;
+const ptt=$('#ptt'),sl=$('#status-line');
+const fmtDur=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const pickMime=()=>['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+async function getStream(){
+  if(stream&&stream.active)return stream;
+  stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  return stream;
+}
+async function startRec(){
+  if(pressing)return;
+  const t=target();if(!t.ok)return toast(t.msg||'Open a friend first');
+  pressing=true;slide=false;
+  if(playing&&playing.end)playing.end();
+  try{await getStream()}catch(e){pressing=false;return toast('Microphone blocked. Allow mic access for this page.')}
+  if(!pressing)return;
+  const mt=pickMime();
+  rec=new MediaRecorder(stream,mt?{mimeType:mt}:{});chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const r=rec;r.onstop=()=>finishRec(r);
+  r.start();t0=performance.now();clearTimeout(ft);
+  ptt.classList.add('live');ptt.textContent='LIVE';
+  timerI=setInterval(()=>{
+    const s=(performance.now()-t0)/1000;
+    sl.textContent=slide?'Release to cancel':'Transmitting '+fmtDur(s)+' · slide left to cancel';
+    if(s>=60)stopRec(false);
+  },100);
+}
+function stopRec(cancel){
+  pressing=false;
+  if(rec&&rec.state==='recording'){slide=!!cancel||slide;rec.stop()}
+}
+async function finishRec(r){
+  clearInterval(timerI);ptt.classList.remove('live','cancel');ptt.textContent='TALK';
+  const dur=(performance.now()-t0)/1000;
+  if(slide)toast('Cancelled');
+  else if(dur<.4)toast('Hold the button while you talk');
+  else{
+    const n=await transmit(new Blob(chunks,{type:r.mimeType||'audio/webm'}),dur);
+    if(n){roger();sl.textContent=n>1?'Sent to '+n+' people ✓':'Sent ✓ · waiting for them to hear it'}
+    else toast('Not sent. They may have just gone offline.');
+  }
+  clearTimeout(ft);ft=setTimeout(refreshFoot,3500);pump();
+}
+ptt.addEventListener('pointerdown',e=>{e.preventDefault();ptt.setPointerCapture(e.pointerId);startX=e.clientX;startRec()});
+ptt.addEventListener('pointermove',e=>{if(!pressing)return;slide=e.clientX<startX-80;ptt.classList.toggle('cancel',slide)});
+ptt.addEventListener('pointerup',()=>stopRec(slide));
+ptt.addEventListener('pointercancel',()=>stopRec(true));
+ptt.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!e.repeat&&view&&!/INPUT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)){e.preventDefault();startRec()}
+});
+document.addEventListener('keyup',e=>{if(e.code==='Space'&&pressing)stopRec(false)});
+
+/* ---------- boot ---------- */
+function boot(){
+  const hasAccess=userHasHostAccess();
+  if(!hasAccess){me.host=false;me.mon=false}
+  else if(me.host===undefined){me.host=true}
+  if(me.mon===undefined)me.mon=true;
+
+  $('#me-name').textContent=me.name;
+  $('#my-id').textContent=me.id;
+  const p=new URLSearchParams(location.search),add=normId(p.get('add')||'');
+  if(add&&add!==me.id){
+    if(isHostId(add)){
+      me.unlockedHost=true;
+      me.host=true;
+      me.mon=true;
+      toast('Connected with host ID-YOBRO! Host mode unlocked.');
+    }
+    const c=ensureContact(add,p.get('n')||(isHostId(add)?'Host (ID-YOBRO)':add));
+    if(p.get('h')||isHostId(add))c.host=true;
+    history.replaceState(null,'',location.pathname);
+  }
+  save();applyHost();renderContacts();startPeer();
+}
+
+if(me)boot();
+else{
+  $('#setup').classList.add('show');
+  $('#setup-form').onsubmit=e=>{
+    e.preventDefault();
+    const customId=normId($('#setup-id').value);
+    const chosenId=customId&&customId.length>=4?customId:genId();
+    const isHost=isHostId(chosenId);
+    me={
+      id:chosenId,
+      name:$('#setup-name').value.trim().slice(0,24),
+      host:isHost,
+      mon:isHost,
+      unlockedHost:isHost
+    };
+    save();
+    $('#setup').classList.remove('show');
+    beep(1,.01,0,'sine',0);
+    boot();
+  };
+}
+})();
+</script>
+</body>
+</html>
