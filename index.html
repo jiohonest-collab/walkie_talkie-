@@ -81,9 +81,9 @@ input{font:inherit;color:inherit;outline:none}
 .av.group-av{background:#00a884;color:#fff}
 
 .side-header-info{flex:1;min-width:0;display:flex;flex-direction:column}
-.my-name{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.my-name{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .my-id-tag{font-size:.74rem;color:var(--wa-mute);display:flex;align-items:center;gap:4px}
-.side-header-acts{display:flex;align-items:center;gap:6px}
+.side-header-acts{display:flex;align-items:center;gap:4px}
 .icon-btn{
   width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#54656f;transition:background .15s;font-size:1.15rem;
 }
@@ -160,7 +160,7 @@ input{font:inherit;color:inherit;outline:none}
   display:flex;
   align-items:center;
   padding:8px 16px;
-  gap:12px;
+  gap:10px;
   z-index:2;
   flex:none;
 }
@@ -168,9 +168,9 @@ input{font:inherit;color:inherit;outline:none}
 .chat-header-center{flex:1;min-width:0;cursor:pointer}
 .chat-header-name{font-weight:600;font-size:1rem;color:var(--wa-text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-header-status{font-size:.76rem;color:var(--wa-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chat-header-acts{display:flex;align-items:center;gap:6px}
+.chat-header-acts{display:flex;align-items:center;gap:4px}
 .wt-toggle-btn{
-  background:#e7f8f4;color:#008069;font-weight:600;font-size:.82rem;padding:6px 12px;border-radius:18px;display:flex;align-items:center;gap:6px;border:1px solid #bcead8;
+  background:#e7f8f4;color:#008069;font-weight:600;font-size:.82rem;padding:6px 10px;border-radius:18px;display:flex;align-items:center;gap:5px;border:1px solid #bcead8;
 }
 .wt-toggle-btn:hover{background:#d5f3eb}
 .wt-toggle-btn.live{background:var(--wa-red);color:#fff;border-color:var(--wa-red);animation:ring 1s infinite}
@@ -256,6 +256,9 @@ input{font:inherit;color:inherit;outline:none}
 }
 .vn-dur{font-size:.74rem;color:var(--wa-mute);min-width:32px;text-align:right}
 
+/* Call log bubble */
+.call-log-bubble{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--wa-text)}
+
 /* Bottom Chat Input Bar */
 #chat-input-bar{
   background:var(--wa-sidebar);
@@ -305,7 +308,71 @@ input{font:inherit;color:inherit;outline:none}
   transform:translateY(5px);box-shadow:0 1px 0 #b97e00;background:var(--wa-red);color:#fff;animation:ring 1s infinite;
 }
 
-/* Modals (New Chat, New Group, Contact Info, Setup) */
+/* ========================================================
+   VOICE & VIDEO CALL OVERLAY (WhatsApp Call Interface)
+   ======================================================== */
+#call-overlay{
+  position:fixed;inset:0;background:#111b21;z-index:100;display:none;flex-direction:column;color:#fff;overflow:hidden;
+}
+#call-overlay.minimized{
+  inset:auto 20px 80px auto;width:280px;height:380px;border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);
+}
+.call-top-bar{
+  height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:10;background:linear-gradient(to bottom, rgba(0,0,0,.6), transparent);
+}
+.call-enc-badge{font-size:.76rem;color:#8696a0;display:flex;align-items:center;gap:4px}
+.call-timer{font-size:.9rem;font-weight:600;color:#fff}
+.call-stage{
+  flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.remote-video{
+  width:100%;height:100%;object-fit:cover;background:#000;
+}
+.call-audio-stage{
+  display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;z-index:2;
+}
+.call-audio-stage .av{width:96px;height:96px;font-size:2.5rem}
+.local-pip{
+  position:absolute;top:16px;right:16px;width:110px;height:150px;border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.4);border:2px solid rgba(255,255,255,.25);background:#000;z-index:5;
+}
+.local-pip video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.call-controls{
+  height:84px;background:linear-gradient(to top, rgba(0,0,0,.7), transparent);display:flex;align-items:center;justify-content:center;gap:20px;z-index:10;padding-bottom:env(safe-area-inset-bottom,0);
+}
+.call-btn{
+  width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;display:grid;place-items:center;font-size:1.35rem;transition:background .15s,transform .1s;
+}
+.call-btn:active{transform:scale(.92)}
+.call-btn.off{background:#fff;color:#111b21}
+.call-btn.end{background:var(--wa-red)}
+
+/* Incoming call modal */
+#inc-call-modal{
+  position:fixed;inset:0;background:rgba(11,20,26,.85);display:none;place-items:center;z-index:120;padding:20px;
+}
+#inc-call-modal.show{display:grid}
+.inc-card{
+  background:#111b21;color:#fff;border-radius:20px;padding:32px 24px;width:min(340px,100%);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.1);
+}
+.inc-card .av{width:88px;height:88px;font-size:2.4rem}
+.inc-actions{display:flex;gap:40px;margin-top:16px}
+.inc-act-btn{
+  width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.4);
+}
+.inc-act-btn.accept{background:var(--wa-green);animation:pulse 1s infinite alternate}
+.inc-act-btn.decline{background:var(--wa-red)}
+
+/* ========================================================
+   ADMIN CONTROL PANEL (Secretive: 20262026)
+   ======================================================== */
+#admin-badge{
+  background:#1f7aec;color:#fff;font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:4px;margin-left:4px;cursor:pointer;
+}
+.admin-card{
+  background:#fff;border-radius:16px;width:min(520px,100%);max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,.28);overflow:hidden;
+}
+
+/* Modals */
 .modal-overlay{
   position:fixed;inset:0;background:rgba(11,20,26,.65);display:none;place-items:center;z-index:50;padding:16px;
 }
@@ -335,7 +402,7 @@ input{font:inherit;color:inherit;outline:none}
   background:#fee7eb;color:var(--wa-red);border:1px solid #fccad2;padding:9px 16px;border-radius:20px;font-weight:600;font-size:.85rem;
 }
 
-/* Contact selection list in Group modal */
+/* Group & member list */
 .member-pick-list{
   max-height:180px;overflow-y:auto;border:1px solid var(--wa-line);border-radius:8px;list-style:none;
 }
@@ -343,6 +410,11 @@ input{font:inherit;color:inherit;outline:none}
   display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;
 }
 .member-pick-list li:hover{background:#f5f6f6}
+
+/* Global Announcement Banner */
+#admin-announcement-bar{
+  display:none;background:#ff9800;color:#000;padding:8px 16px;font-weight:700;font-size:.88rem;align-items:center;justify-content:space-between;z-index:9;box-shadow:0 2px 4px rgba(0,0,0,.15);
+}
 
 /* Toast */
 #toast{
@@ -357,6 +429,7 @@ input{font:inherit;color:inherit;outline:none}
   #app.in-chat #main-chat{display:flex}
   .back-btn{display:block}
   #wt-drawer{bottom:80px;right:10px;left:10px;width:auto}
+  #call-overlay.minimized{inset:auto 10px 70px auto;width:200px;height:260px}
 }
 </style>
 </head>
@@ -369,10 +442,14 @@ input{font:inherit;color:inherit;outline:none}
     <div class="av" id="my-av"><span id="my-av-letter">U</span></div>
    </div>
    <div class="side-header-info">
-    <b class="my-name" id="me-name">You</b>
+    <div class="my-name">
+     <span id="me-name">You</span>
+     <span id="admin-badge" hidden title="Secret Admin Panel">🛡️ ADMIN</span>
+    </div>
     <div class="my-id-tag">ID: <span id="my-id-text">------</span></div>
    </div>
    <div class="side-header-acts">
+    <button class="icon-btn" id="btn-admin-panel" title="Admin Control" hidden>🛡️</button>
     <button class="icon-btn" id="btn-new-group" title="New Group">👥</button>
     <button class="icon-btn" id="btn-add-chat" title="Add Friend by ID">➕</button>
     <button class="icon-btn" id="btn-my-settings" title="My Profile & Settings">⚙️</button>
@@ -397,11 +474,19 @@ input{font:inherit;color:inherit;outline:none}
 
  <!-- MAIN CHAT VIEW -->
  <main id="main-chat">
+  <!-- Global Admin Broadcast Banner (if sent by Admin) -->
+  <div id="admin-announcement-bar">
+   <div style="display:flex;align-items:center;gap:8px">
+    <span>📢</span> <span id="admin-announcement-text">Announcement</span>
+   </div>
+   <button onclick="$('#admin-announcement-bar').style.display='none'" style="font-weight:700">✕</button>
+  </div>
+
   <!-- When no chat is selected (Desktop) -->
   <div id="no-chat">
    <div class="no-chat-icon">📻</div>
    <h2>Walkie Talkie Web</h2>
-   <p>Send instant voice notes, text messages, and chat in groups.<br>Connect with friends or groups using their ID.</p>
+   <p>Send instant voice notes, text messages, voice calls, and video calls.<br>Connect with friends or groups using their ID.</p>
    <button class="btn-primary" id="btn-start-chat" style="margin-top:10px">Start a New Chat</button>
   </div>
 
@@ -415,8 +500,10 @@ input{font:inherit;color:inherit;outline:none}
      <div class="chat-header-status" id="chat-subtitle">offline</div>
     </div>
     <div class="chat-header-acts">
+     <button class="icon-btn" id="btn-voice-call" title="Voice call">📞</button>
+     <button class="icon-btn" id="btn-video-call" title="Video call">📹</button>
      <button class="wt-toggle-btn" id="btn-wt-toggle" title="Open Walkie Talkie dial">
-      <span>📻</span> <span id="wt-btn-txt">Walkie Talkie</span>
+      <span>📻</span> <span id="wt-btn-txt">Talk</span>
      </button>
      <button class="icon-btn" id="btn-chat-menu" title="Contact / Group Info">⋮</button>
     </div>
@@ -467,6 +554,88 @@ input{font:inherit;color:inherit;outline:none}
  </main>
 </div>
 
+<!-- ========================================================
+     WHATSAPP VOICE & VIDEO CALL OVERLAY
+     ======================================================== -->
+<div id="call-overlay">
+ <div class="call-top-bar">
+  <div class="call-enc-badge">🔒 End-to-end encrypted</div>
+  <div class="call-timer" id="call-duration">00:00</div>
+  <button class="icon-btn" id="btn-call-minimize" style="color:#fff;font-size:1rem" title="Minimize / Float">🗗</button>
+ </div>
+
+ <div class="call-stage" id="call-stage">
+  <!-- Remote Video -->
+  <video id="remote-video" class="remote-video" autoplay playsinline></video>
+
+  <!-- Audio call display (when remote camera is off or voice call) -->
+  <div class="call-audio-stage" id="call-audio-stage">
+   <div class="av" id="call-stage-av"><span>?</span></div>
+   <h2 id="call-stage-name" style="font-size:1.4rem">Friend</h2>
+   <div id="call-status-label" style="font-size:.9rem;color:#8696a0">Calling...</div>
+  </div>
+
+  <!-- Local Video PIP -->
+  <div class="local-pip" id="local-pip">
+   <video id="local-video" autoplay playsinline muted></video>
+  </div>
+ </div>
+
+ <div class="call-controls">
+  <button class="call-btn" id="btn-toggle-cam" title="Camera on/off">📷</button>
+  <button class="call-btn" id="btn-toggle-mic" title="Mute/unmute">🎤</button>
+  <button class="call-btn end" id="btn-end-call" title="End call">📴</button>
+ </div>
+</div>
+
+<!-- INCOMING CALL POPUP -->
+<div id="inc-call-modal">
+ <div class="inc-card">
+  <div class="av" id="inc-av"><span>?</span></div>
+  <h3 id="inc-caller-name" style="font-size:1.25rem">Friend</h3>
+  <div id="inc-call-type-text" style="color:#8696a0;font-size:.88rem">Incoming Video Call...</div>
+  <div class="inc-actions">
+   <button class="inc-act-btn decline" id="btn-inc-decline" title="Decline">📴</button>
+   <button class="inc-act-btn accept" id="btn-inc-accept" title="Answer">📞</button>
+  </div>
+ </div>
+</div>
+
+<!-- ========================================================
+     SECRET ADMIN CONTROL PANEL (ID 20262026)
+     ======================================================== -->
+<div class="modal-overlay" id="modal-admin">
+ <div class="admin-card">
+  <div class="modal-head" style="background:#0b141a">
+   <button class="icon-btn" style="color:#fff;margin-left:-8px" onclick="closeModal('modal-admin')">✕</button>
+   <span>🛡️ Admin Command Center</span>
+  </div>
+  <div class="modal-body">
+   <div style="background:#f0f2f5;padding:10px 14px;border-radius:10px;font-size:.85rem">
+    <b>Admin Status:</b> <span style="color:var(--wa-green)">Active (ID 20262026)</span>
+   </div>
+
+   <div style="display:flex;flex-direction:column;gap:8px">
+    <label style="font-size:.84rem;font-weight:700">📢 Global Broadcast Announcement</label>
+    <div style="display:flex;gap:6px">
+     <input class="input-field" id="admin-broadcast-input" placeholder="Broadcast alert to all connected users...">
+     <button class="btn-primary" id="btn-admin-broadcast">Broadcast</button>
+    </div>
+   </div>
+
+   <div style="display:flex;flex-direction:column;gap:8px">
+    <label style="font-size:.84rem;font-weight:700">⚡ Connected Peers & Moderation</label>
+    <ul class="member-pick-list" id="admin-peers-list" style="max-height:160px"></ul>
+   </div>
+
+   <div style="border-top:1px solid var(--wa-line);padding-top:10px;display:flex;gap:8px;justify-content:space-between">
+    <button class="btn-danger" id="btn-admin-wipe-all">Wipe All Room Chats</button>
+    <button class="btn-secondary" onclick="closeModal('modal-admin')">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+
 <!-- MODAL: ADD FRIEND BY ID -->
 <div class="modal-overlay" id="modal-add-friend">
  <div class="modal-card">
@@ -508,7 +677,6 @@ input{font:inherit;color:inherit;outline:none}
    <input class="input-field" id="input-group-name" placeholder="e.g. Squad Talk, Family, Team" required maxlength="30" autocomplete="off">
    <label style="font-size:.85rem;color:var(--wa-mute)">Select Members to add:</label>
    <ul class="member-pick-list" id="group-member-choices"></ul>
-   <div style="font-size:.75rem;color:var(--wa-mute)">You can also share the Group ID later so others can join directly!</div>
    <div class="modal-foot" style="margin:8px -22px -20px;padding-bottom:14px">
     <button type="button" class="btn-secondary" onclick="closeModal('modal-new-group')">Cancel</button>
     <button type="submit" class="btn-primary">Create Group</button>
@@ -592,7 +760,7 @@ input{font:inherit;color:inherit;outline:none}
   </div>
   <form id="form-setup" class="modal-body" style="text-align:center">
    <p style="font-size:.88rem;color:var(--wa-mute);text-align:left">
-    Set up your profile to start chatting and sending voice notes. Your ID and chats stay safe on this device.
+    Set up your profile to start chatting, calling, and sending voice notes. Your data stays safe on this device.
    </p>
    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:6px 0">
     <div class="av lg" id="setup-av-prev" style="cursor:pointer" title="Pick photo"><span>?</span></div>
@@ -617,6 +785,7 @@ input{font:inherit;color:inherit;outline:none}
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 const ECHO='ECHO00',ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const _SECRET_ADMIN_ID='20262026';
 
 const ls={
   get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
@@ -647,11 +816,11 @@ let me=ls.get('wt_me',null);
 let contacts=ls.get('wt_contacts',null)||[
   {id:ECHO,name:'Echo Test',customName:'',photo:'',isGroup:false}
 ];
-let groups=ls.get('wt_groups',{})||{}; // { groupId: { id, name, photo, members:[] } }
-let messages=ls.get('wt_msgs',{})||{}; // { chatId: [ { id, from, name, text, audioBlobUrl, dur, ts, status:'pending'|'sent'|'delivered'|'read', isVoice } ] }
-let outbox=ls.get('wt_outbox',{})||{}; // { peerId: [ pendingMsgObj ] }
+let groups=ls.get('wt_groups',{})||{};
+let messages=ls.get('wt_msgs',{})||{};
+let outbox=ls.get('wt_outbox',{})||{};
 let blocked=new Set(ls.get('wt_blocked',[]));
-let activeChatId=null; // contact ID or group ID
+let activeChatId=null;
 let filterMode='all';
 
 const save=()=>{
@@ -662,6 +831,11 @@ const save=()=>{
   ls.set('wt_blocked',[...blocked]);
   if(me)ls.set('wt_me',me);
 };
+
+/* Secret Admin Verification */
+function isAdmin(){
+  return !!(me && (me.id === _SECRET_ADMIN_ID || me.secretAdmin));
+}
 
 /* Peer networking */
 let peer=null,conns={},tried={};
@@ -706,14 +880,12 @@ function setAvContent(avEl, photoUrl, fallbackText, isGroup=false){
   }
 }
 
-/* Name resolver: Custom rename takes priority for current user */
 function getContact(id){return contacts.find(c=>c.id===id)}
 function displayName(id){
   if(id===me.id)return 'You';
   if(groups[id])return groups[id].name;
   const c=getContact(id);
   if(c){
-    // Custom name set by the user takes precedence!
     if(c.customName&&c.customName.trim())return c.customName.trim();
     if(c.name)return c.name;
   }
@@ -753,6 +925,17 @@ const playSentChime=()=>beep(900,.04,0,'sine',.04);
 const playRecvChime=()=>{beep(800,.05,0,'sine',.05);beep(1200,.08,.06,'sine',.05)};
 const squelch=()=>beep(650,.07,0,'square',.03);
 
+let ringOscInterval=null;
+function startRingtone(){
+  stopRingtone();
+  ringOscInterval=setInterval(()=>{
+    beep(440,.3,0,'sine',.08);beep(480,.3,.05,'sine',.08);
+  },2000);
+}
+function stopRingtone(){
+  if(ringOscInterval){clearInterval(ringOscInterval);ringOscInterval=null}
+}
+
 /* ---------- PeerJS Setup ---------- */
 function startPeer(){
   if(typeof Peer==='undefined'){toast('PeerJS library not loaded');return}
@@ -764,6 +947,9 @@ function startPeer(){
     const rid=c.peer.replace('wtalk-','');
     if(blocked.has(rid)){c.on('open',()=>c.close());return}
     setupConn(c);
+  });
+  peer.on('call',mediaConn=>{
+    handleIncomingMediaCall(mediaConn);
   });
   peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
   peer.on('error',e=>{
@@ -782,7 +968,6 @@ function setupConn(c){
   const rid=c.peer.replace('wtalk-','');
   c.on('open',()=>{
     c.pong=Date.now();conns[rid]=c;
-    // Handshake
     c.send({t:'hello',name:me.name,photo:me.photo||'',customId:me.id});
     flushOutbox(rid);
     refreshUI();
@@ -798,7 +983,6 @@ function sendRaw(id,o){
   return false;
 }
 
-/* Polling & pinging */
 setInterval(()=>{
   if(!peer||!peer.open)return;
   Object.keys(conns).forEach(id=>sendRaw(id,{t:'ping',ts:Date.now()}));
@@ -837,6 +1021,16 @@ function onData(rid,d){
     handleAck(d.mid,d.status||'delivered');
   }else if(d.t==='group_invite'){
     handleGroupInvite(rid,d);
+  }else if(d.t==='call_declined'){
+    handleCallDeclined(rid);
+  }else if(d.t==='admin_broadcast'){
+    // Display global announcement from Admin
+    $('#admin-announcement-text').textContent=d.text;
+    $('#admin-announcement-bar').style.display='flex';
+    beep(1000,.1);beep(1400,.15,.1);
+  }else if(d.t==='admin_kick'){
+    toast('You were disconnected by the Admin');
+    if(conns[rid])conns[rid].close();
   }
 }
 
@@ -968,10 +1162,18 @@ function showAudioBanner(name,photo,blobUrl){
   });
 }
 
-/* Send a Text Message */
 function sendMessage(text){
   text=text.trim();
   if(!text||!activeChatId)return;
+
+  // Secret admin command check
+  if(text===_SECRET_ADMIN_ID||text==='/admin '+_SECRET_ADMIN_ID){
+    me.secretAdmin=true;save();refreshUI();
+    openModal('modal-admin');
+    toast('Admin Control Center unlocked!');
+    return;
+  }
+
   const mid=uid();
   const isGrp=!!groups[activeChatId];
   const msg={
@@ -1041,7 +1243,6 @@ function sendMessage(text){
   renderMessages();
 }
 
-/* Send a Voice Note / Transmission */
 async function sendVoiceTransmission(blob,dur){
   if(!activeChatId)return;
   const mid=uid();
@@ -1101,6 +1302,234 @@ async function sendVoiceTransmission(blob,dur){
   save();
   renderMessages();
 }
+
+/* ========================================================
+   VOICE CALL & VIDEO CALL ENGINE
+   ======================================================== */
+let activeCall=null;
+let activeCallType='voice'; // 'voice' or 'video'
+let callMediaStream=null;
+let callStartTime=0,callTimerInterval=null;
+let incomingMediaConn=null;
+
+async function getCallStream(isVideo=false){
+  if(callMediaStream&&callMediaStream.active)return callMediaStream;
+  callMediaStream=await navigator.mediaDevices.getUserMedia({
+    audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},
+    video:isVideo?{width:{ideal:1280},height:{ideal:720},facingMode:'user'}:false
+  });
+  return callMediaStream;
+}
+
+function initiateCall(isVideo=false){
+  if(!activeChatId)return toast('Select a friend to call');
+  if(groups[activeChatId])return toast('Group calls available in walkie-talkie mode');
+
+  activeCallType=isVideo?'video':'voice';
+  openCallOverlay(activeChatId,activeCallType,true);
+
+  if(activeChatId===ECHO){
+    $('#call-status-label').textContent='Connecting to Echo test...';
+    getCallStream(isVideo).then(stream=>{
+      attachLocalStream(stream);
+      setTimeout(()=>{
+        $('#call-status-label').textContent='Connected to Echo';
+        attachRemoteStream(stream);
+        startCallTimer();
+        beep(1000,.08);
+      },1200);
+    }).catch(()=>{
+      toast('Camera/Mic permission denied');
+      endCall();
+    });
+    return;
+  }
+
+  $('#call-status-label').textContent='Ringing...';
+  startRingtone();
+
+  getCallStream(isVideo).then(stream=>{
+    attachLocalStream(stream);
+    const mediaConn=peer.call('wtalk-'+activeChatId,stream,{
+      metadata:{type:activeCallType,name:me.name,photo:me.photo||''}
+    });
+    activeCall=mediaConn;
+
+    mediaConn.on('stream',remoteStream=>{
+      stopRingtone();
+      $('#call-status-label').textContent='Connected';
+      attachRemoteStream(remoteStream);
+      startCallTimer();
+    });
+    mediaConn.on('close',()=>{
+      endCall('Call ended');
+    });
+    mediaConn.on('error',()=>{
+      endCall('Call connection failed');
+    });
+  }).catch(()=>{
+    stopRingtone();
+    toast('Camera or mic access denied');
+    endCall();
+  });
+}
+
+function handleIncomingMediaCall(mediaConn){
+  incomingMediaConn=mediaConn;
+  const meta=mediaConn.metadata||{};
+  const callerName=meta.name||mediaConn.peer.replace('wtalk-','');
+  const callerPhoto=meta.photo||'';
+  const isVideo=meta.type==='video';
+
+  $('#inc-caller-name').textContent=callerName;
+  $('#inc-call-type-text').textContent=isVideo?'Incoming WhatsApp Video Call...':'Incoming WhatsApp Voice Call...';
+  setAvContent($('#inc-av'),callerPhoto,callerName);
+
+  $('#inc-call-modal').classList.add('show');
+  startRingtone();
+}
+
+$('#btn-inc-accept').onclick=()=>{
+  $('#inc-call-modal').classList.remove('show');
+  stopRingtone();
+  if(!incomingMediaConn)return;
+
+  const meta=incomingMediaConn.metadata||{};
+  activeCallType=meta.type||'voice';
+  const isVideo=activeCallType==='video';
+  const remotePeerId=incomingMediaConn.peer.replace('wtalk-','');
+
+  openCallOverlay(remotePeerId,activeCallType,false);
+  $('#call-status-label').textContent='Connecting...';
+
+  getCallStream(isVideo).then(stream=>{
+    attachLocalStream(stream);
+    incomingMediaConn.answer(stream);
+    activeCall=incomingMediaConn;
+
+    incomingMediaConn.on('stream',remoteStream=>{
+      $('#call-status-label').textContent='Connected';
+      attachRemoteStream(remoteStream);
+      startCallTimer();
+    });
+    incomingMediaConn.on('close',()=>{
+      endCall('Call ended');
+    });
+  }).catch(()=>{
+    incomingMediaConn.close();
+    endCall('Permission denied');
+  });
+};
+
+$('#btn-inc-decline').onclick=()=>{
+  $('#inc-call-modal').classList.remove('show');
+  stopRingtone();
+  if(incomingMediaConn){
+    const rid=incomingMediaConn.peer.replace('wtalk-','');
+    sendRaw(rid,{t:'call_declined'});
+    incomingMediaConn.close();
+    incomingMediaConn=null;
+  }
+};
+
+function handleCallDeclined(senderId){
+  stopRingtone();
+  endCall(displayName(senderId)+' declined the call');
+}
+
+function openCallOverlay(peerId,type,isOutgoing){
+  const overlay=$('#call-overlay');
+  overlay.style.display='flex';
+  overlay.classList.remove('minimized');
+  $('#call-duration').textContent='00:00';
+
+  const name=displayName(peerId);
+  const photo=displayPhoto(peerId);
+  $('#call-stage-name').textContent=name;
+  setAvContent($('#call-stage-av'),photo,name);
+
+  if(type==='video'){
+    $('#remote-video').style.display='block';
+    $('#local-pip').style.display='block';
+    $('#call-audio-stage').style.display='none';
+  }else{
+    $('#remote-video').style.display='none';
+    $('#local-pip').style.display='none';
+    $('#call-audio-stage').style.display='flex';
+  }
+}
+
+function attachLocalStream(stream){
+  const lv=$('#local-video');
+  lv.srcObject=stream;
+}
+
+function attachRemoteStream(stream){
+  const rv=$('#remote-video');
+  rv.srcObject=stream;
+  if(activeCallType==='video'){
+    $('#remote-video').style.display='block';
+    $('#call-audio-stage').style.display='none';
+  }
+}
+
+function startCallTimer(){
+  callStartTime=Date.now();
+  if(callTimerInterval)clearInterval(callTimerInterval);
+  callTimerInterval=setInterval(()=>{
+    const diff=Math.floor((Date.now()-callStartTime)/1000);
+    const m=Math.floor(diff/60);
+    const s=diff%60;
+    $('#call-duration').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  },1000);
+}
+
+function endCall(msg){
+  stopRingtone();
+  if(callTimerInterval){clearInterval(callTimerInterval);callTimerInterval=null}
+  if(activeCall){
+    try{activeCall.close()}catch(e){}
+    activeCall=null;
+  }
+  if(callMediaStream){
+    callMediaStream.getTracks().forEach(t=>t.stop());
+    callMediaStream=null;
+  }
+  $('#call-overlay').style.display='none';
+  $('#remote-video').srcObject=null;
+  $('#local-video').srcObject=null;
+  if(msg)toast(msg);
+}
+
+$('#btn-end-call').onclick=()=>endCall('Call ended');
+
+/* Mute / Camera Toggles */
+$('#btn-toggle-mic').onclick=()=>{
+  if(!callMediaStream)return;
+  const at=callMediaStream.getAudioTracks()[0];
+  if(at){
+    at.enabled=!at.enabled;
+    $('#btn-toggle-mic').classList.toggle('off',!at.enabled);
+    $('#btn-toggle-mic').textContent=at.enabled?'🎤':'🔇';
+  }
+};
+
+$('#btn-toggle-cam').onclick=()=>{
+  if(!callMediaStream)return;
+  const vt=callMediaStream.getVideoTracks()[0];
+  if(vt){
+    vt.enabled=!vt.enabled;
+    $('#btn-toggle-cam').classList.toggle('off',!vt.enabled);
+    $('#local-pip').style.display=vt.enabled?'block':'none';
+  }
+};
+
+$('#btn-call-minimize').onclick=()=>{
+  $('#call-overlay').classList.toggle('minimized');
+};
+
+$('#btn-voice-call').onclick=()=>initiateCall(false);
+$('#btn-video-call').onclick=()=>initiateCall(true);
 
 /* ---------- Group Features ---------- */
 function createGroup(name,photo,memberIds){
@@ -1213,7 +1642,6 @@ function openChat(chatId){
     $('#chat-subtitle').textContent=isContactOnline(chatId)?'Online':'Offline · Messages will queue';
   }
 
-  // Mark messages as read
   const msgs=getChatMessages(chatId);
   msgs.forEach(m=>{
     if(m.from!==me.id&&m.status!=='read'){
@@ -1307,6 +1735,10 @@ function refreshUI(){
   $('#me-name').textContent=me.name;
   $('#my-id-text').textContent=me.id;
   $('#settings-my-id').textContent=me.id;
+
+  const adm=isAdmin();
+  $('#admin-badge').hidden=!adm;
+  $('#btn-admin-panel').hidden=!adm;
 
   setAvContent($('#my-av'),me.photo,me.name);
   setAvContent($('#settings-av-box'),me.photo,me.name);
@@ -1576,7 +2008,6 @@ function openContactInfo(chatId){
   openModal('modal-info');
 }
 
-/* FIX RENAME: Renames ONLY for the person who renamed it! */
 $('#btn-save-rename').onclick=()=>{
   if(!activeChatId)return;
   const newName=$('#info-custom-name').value.trim();
@@ -1586,7 +2017,7 @@ $('#btn-save-rename').onclick=()=>{
   }else{
     const c=getContact(activeChatId);
     if(c){
-      c.customName=newName; // Saved strictly on this device!
+      c.customName=newName;
     }
   }
   save();
@@ -1658,11 +2089,71 @@ $('#btn-set-custom-id').onclick=()=>{
   const nid=normId(n);
   if(nid.length<4)return toast('ID must be at least 4 chars');
   me.id=nid;
+  if(nid===_SECRET_ADMIN_ID){
+    me.secretAdmin=true;
+    toast('Admin access granted!');
+  }
   save();
   if(peer){try{peer.destroy()}catch(e){}}
   startPeer();
   refreshUI();
   toast('Your ID is now '+nid);
+};
+
+/* ========================================================
+   ADMIN CONTROL PANEL ACTIONS
+   ======================================================== */
+$('#btn-admin-panel').onclick=()=>openAdminPanel();
+$('#admin-badge').onclick=()=>openAdminPanel();
+
+function openAdminPanel(){
+  if(!isAdmin())return;
+  renderAdminPeersList();
+  openModal('modal-admin');
+}
+
+function renderAdminPeersList(){
+  const ul=$('#admin-peers-list');
+  ul.innerHTML='';
+  const peerIds=Object.keys(conns);
+  if(!peerIds.length){
+    ul.append(el('li','','No remote peers currently connected'));
+    return;
+  }
+  peerIds.forEach(id=>{
+    const li=el('li');
+    const info=el('div','',{style:'flex:1'});
+    info.textContent=displayName(id)+' ('+id+')';
+    const kickBtn=el('button','btn-danger','Kick');
+    kickBtn.style.padding='4px 10px';
+    kickBtn.onclick=()=>{
+      sendRaw(id,{t:'admin_kick'});
+      if(conns[id])conns[id].close();
+      toast('Kicked peer '+id);
+      renderAdminPeersList();
+    };
+    li.append(info,kickBtn);
+    ul.append(li);
+  });
+}
+
+$('#btn-admin-broadcast').onclick=()=>{
+  const text=$('#admin-broadcast-input').value.trim();
+  if(!text)return;
+  Object.keys(conns).forEach(id=>{
+    sendRaw(id,{t:'admin_broadcast',text});
+  });
+  $('#admin-announcement-text').textContent=text;
+  $('#admin-announcement-bar').style.display='flex';
+  $('#admin-broadcast-input').value='';
+  toast('Announcement broadcasted to all peers!');
+};
+
+$('#btn-admin-wipe-all').onclick=()=>{
+  if(!confirm('Admin: Wipe all local room chat histories?'))return;
+  messages={};save();
+  renderMessages();renderChatsList();
+  toast('All chat histories wiped');
 };
 
 /* Filter Tabs */
@@ -1694,7 +2185,8 @@ if(!me){
     me={
       id:chosenId,
       name:$('#setup-name').value.trim().slice(0,24)||'User',
-      photo:tempSetupPhoto||''
+      photo:tempSetupPhoto||'',
+      secretAdmin:chosenId===_SECRET_ADMIN_ID
     };
     save();
     closeModal('modal-setup');
@@ -1702,6 +2194,7 @@ if(!me){
     refreshUI();
   };
 }else{
+  if(me.id===_SECRET_ADMIN_ID)me.secretAdmin=true;
   startPeer();
   refreshUI();
 }
